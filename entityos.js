@@ -233,9 +233,14 @@ module.exports =
 
             headers['Content-Length'] = requestData.length;
 		}
-		else
+		else if (requestData != undefined)
 		{    
             headers['Content-Length'] = requestData.length;
+		}
+		else 
+		{   
+			requestData = ''; 
+            headers['Content-Length'] = 0;
 		}
 
         headers['Content-Type'] = options.contentType;
