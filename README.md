@@ -7,7 +7,7 @@ Makes it easy to init your node app onto the entityos.cloud platform / API and s
 
 - http://entityos.cloud
 - http://docs.entityos.cloud/gettingstarted_nodejs
-- npm install entityos
+- `npm install entityos`
 - Example app; https://github.com/ibcom/entityos-learn
 
 <!-- end of the list -->
