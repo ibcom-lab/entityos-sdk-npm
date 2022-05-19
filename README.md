@@ -32,3 +32,9 @@ Cloud data storage methods:
 - entityos.cloud.invoke({object:, data:, callback:});
 
 <!-- end of the list -->
+
+## mydigitalstructure Compatibility
+
+The code exposes the same module object, so for backwards compatibility just do:
+
+`var mydigitalstructure = require('entityos');`
