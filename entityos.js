@@ -595,17 +595,32 @@ module.exports =
 				param.contentType = 'application/json'
 			}
 
-			module.exports.send(
+			if (param.json == true)
 			{
-				type: param.type,
-				url: param.url,
-				all: param.all,
-				rows: param.rows,
-                contentType: param.contentType
-			},
-			param.data.criteria,
-			param.callback,
-			param.callbackParam);
+				module.exports.send(
+				{
+					type: param.type,
+					url: param.url,
+					all: param.all,
+					rows: param.rows,
+					contentType: param.contentType
+				},
+				param.data.criteria,
+				param.callback,
+				param.callbackParam);
+			}
+			else
+			{
+				module.exports.send(
+				{
+					type: param.type,
+					url: param.url,
+					all: param.all
+				},
+				'criteria=' + JSON.stringify(param.data.criteria),
+				param.callback,
+				param.callbackParam);
+			}
 		},
 
 		search: function (param) {module.exports.cloud.retrieve(param)},
