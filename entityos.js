@@ -3,7 +3,7 @@ var moment = require('moment');
 
 module.exports = 
 {
-	VERSION: '2.2.8',
+	VERSION: '2.2.9',
 
 	data: {session: undefined},
 	controller: {},
@@ -30,6 +30,23 @@ module.exports =
 			{
 				siteSuffix = '-' + settings;
 			}
+			else
+			{
+				if (_.has(module.exports.data, 'site'))
+				{
+					siteSuffix = '-' + module.exports.data.site;
+				}
+
+				if (_.has(module.exports.data, 'context'))
+				{
+					siteSuffix = '-' + module.exports.data.context;
+				}
+
+				if (_.has(module.exports.data, 'space'))
+				{
+					siteSuffix = '-' + module.exports.data.space;
+				}
+			}
 
 			var fs = require('fs');
 
@@ -51,7 +68,28 @@ module.exports =
 						module.exports.data.settings = settings;
 					}
 
-					module.exports.logon(callBack, settings)
+					var logon = false;
+
+					if (_.has(settings, 'entityos.logon'))
+					{
+						logon = _.isSet(settings.entityos.logon)
+					}
+
+					if (logon)
+					{
+						module.exports.logon(callBack, settings)
+					}
+					else
+					{
+						if (_.isFunction(callBack))
+						{
+							callBack({settings: settings})
+						}
+						else
+						{
+							module.exports._util.controller.invoke(callBack, {settings: settings}, settings);
+						}
+					}
 				}
 				else
 				{
