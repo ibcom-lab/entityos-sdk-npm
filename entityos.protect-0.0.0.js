@@ -110,27 +110,25 @@ module.exports =
     {
         const { createCipheriv, randomBytes } = require('crypto');
 
-        if (param.key == undefined)
+        if (param.keyPrivate == undefined)
         {
             param.keyPrivate = randomBytes(32);
-			param.key =  param.keyPrivate.toString('hex');
         }
 
-        if (param.iv == undefined)
+        if (param.initialisationVector == undefined)
         {
             param.initialisationVector = randomBytes(16);
-			param.iv =  param.initialisationVector.toString('hex');
         }
-    
+
+        param.iv =  param.initialisationVector.toString('hex');
+        param.key =  param.keyPrivate.toString('hex');
+
         if (param.encryptionMethod == undefined)
         {
             param.encryptionMethod = 'aes256'
         }
 
-		param._keyPrivate = new Buffer.from(param.key, 'hex');
-        param._initialisationVector = new Buffer.from(param.iv, 'hex');
-
-        const cipher = createCipheriv(param.encryptionMethod, param._keyPrivate, param._initialisationVector);
+        const cipher = createCipheriv(param.encryptionMethod, param.keyPrivate, param.initialisationVector);
 
         if (param.output == undefined)
         {
@@ -148,18 +146,8 @@ module.exports =
 
         var param = entityos.get({ scope: '_param'});
 
-		if (param.key == undefined)
-        {
-			param.key =  param.keyPrivate
-        }
-
-		if (param.iv == undefined)
-        {
-			param.key =  param.initialisationVector
-        }
-
-        param._keyPrivate = new Buffer.from(param.key, 'hex');
-        param._initialisationVector = new Buffer.from(param.iv, 'hex');
+        param._keyPrivate = new Buffer.from(param.keyPrivate, 'hex');
+        param._initialisationVector = new Buffer.from(param.initialisationVector, 'hex');
         
         if (param.encryptionMethod == undefined)
         {
@@ -178,7 +166,7 @@ module.exports =
         return param;     
     },
 	
-    sign: function (param)
+    code: function (param)
     {
         const { createSign, createVerify } = require('crypto');
         const { generateKeyPairSync } = require('crypto');

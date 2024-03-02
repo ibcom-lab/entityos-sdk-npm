@@ -56,6 +56,23 @@ module.exports =
 				{	
 					var _settings = buffer.toString();
 					settings = JSON.parse(_settings);
+
+					if (_.has(settings, 'rules'))
+					{
+						_.each(settings.rules, function (rule)
+						{
+							if (_.has(rule, 'set'))
+							{
+								rule.value = process.env[rule.env];
+								if (_.isUndefined(rule.value))
+								{
+									rule.value = rule.default;
+								}
+								_.set(settings, rule.set, rule.value)
+							}
+						});
+					}
+
 					module.exports.data._settings = settings;
 
 					if (!_.isUndefined(settings))
