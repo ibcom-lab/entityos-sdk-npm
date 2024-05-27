@@ -3,7 +3,7 @@ var moment = require('moment');
 
 module.exports = 
 {
-	VERSION: '2.2.9',
+	VERSION: '2.2.10',
 
 	data: {session: undefined},
 	controller: {},
@@ -32,19 +32,31 @@ module.exports =
 			}
 			else
 			{
-				if (_.has(module.exports.data, 'site'))
+				var _event = module.exports.data._event;
+
+				if (_.has(_event, 'site'))
 				{
-					siteSuffix = '-' + module.exports.data.site;
+					siteSuffix = '-' + _event.site;
 				}
 
-				if (_.has(module.exports.data, 'context'))
+				if (_.has(_event, 'context'))
 				{
-					siteSuffix = '-' + module.exports.data.context;
+					siteSuffix = '-' + _event.context;
 				}
 
-				if (_.has(module.exports.data, 'space'))
+				if (_.has(_event, 'space'))
 				{
-					siteSuffix = '-' + module.exports.data.space;
+					siteSuffix = '-' + _event.space;
+				}
+
+				if (_.has(_event, 'settings'))
+				{
+					siteSuffix = '-' + _event.settings;
+				}
+
+				if (_.has(_event, 'body.data._context'))
+				{
+					siteSuffix = '-' +_event.body.data._context;
 				}
 			}
 
@@ -63,11 +75,19 @@ module.exports =
 						{
 							if (_.has(rule, 'set'))
 							{
-								rule.value = process.env[rule.env];
-								if (_.isUndefined(rule.value))
-								{
-									rule.value = rule.default;
+								if (rule.value == undefined)
+								{ 
+									if (rule.env != undefined)
+									{
+										rule.value = process.env[rule.env];
+										
+										if (_.isUndefined(rule.value))
+										{
+											rule.value = rule.default;
+										}
+									}
 								}
+
 								_.set(settings, rule.set, rule.value)
 							}
 						});
