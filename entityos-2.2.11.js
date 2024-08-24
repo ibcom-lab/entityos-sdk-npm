@@ -1560,10 +1560,10 @@ module.exports =
 
 		generateRandomText: function (param)
 		{
-			var length = module.exports._util.param.get(param, 'length').value;
-			var specialChars = module.exports._util.param.get(param, 'specialChars', {"default": false}).value;
-			var charset = module.exports._util.param.get(param, 'charset').value;
-			var referenceNumber = module.exports._util.param.get(param, 'referenceNumber', {"default": false}).value;
+			var length = entityos._util.param.get(param, 'length').value;
+			var specialChars = entityos._util.param.get(param, 'specialChars', {"default": false}).value;
+			var charset = entityos._util.param.get(param, 'charset').value;
+			var referenceNumber = entityos._util.param.get(param, 'referenceNumber', {"default": false}).value;
 
 			var generatedText = '';
 
@@ -1599,12 +1599,17 @@ module.exports =
 
 				const crypto = require('crypto');
 
+				// Create a buffer to hold the random values
 				const values = new Uint8Array(length);
-				crypto.randomFillSync(values);
-				
+				crypto.randomFillSync(values); // Fill the buffer with cryptographically secure random values
+
+				// Generate the text
+				let generatedText = '';
 				for (let i = 0; i < length; i++) {
 					generatedText += charset[values[i] % charset.length];
 				}
+
+				console.log(generatedText);
 			}
 
 			return generatedText;

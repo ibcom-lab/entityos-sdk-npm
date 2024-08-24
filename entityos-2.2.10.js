@@ -3,7 +3,7 @@ var moment = require('moment');
 
 module.exports = 
 {
-	VERSION: '2.2.11',
+	VERSION: '2.2.10',
 
 	data: {session: undefined},
 	controller: {},
@@ -1556,59 +1556,7 @@ module.exports =
 
                 module.exports._util.onComplete(param)
             }
-        },
-
-		generateRandomText: function (param)
-		{
-			var length = module.exports._util.param.get(param, 'length').value;
-			var specialChars = module.exports._util.param.get(param, 'specialChars', {"default": false}).value;
-			var charset = module.exports._util.param.get(param, 'charset').value;
-			var referenceNumber = module.exports._util.param.get(param, 'referenceNumber', {"default": false}).value;
-
-			var generatedText = '';
-
-			if (referenceNumber)
-			{
-				charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-				if (_.isUndefined(length))
-				{
-					length = 6
-				}
-
-				for (let i = 0; i < length; i++) {
-					const randomIndex = Math.floor(Math.random() * charset.length);
-					generatedText += charset[randomIndex];
-				}
-			}
-			else
-			{
-				if (_.isUndefined(length))
-				{
-					length = 16
-				}
-
-				if (_.isUndefined(charset))
-				{
-					charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-					if (specialChars)
-					{
-						charset += '!@#$%^&*()_+~`|}{[]:;?><,./-=';
-					}
-				}
-
-				const crypto = require('crypto');
-
-				const values = new Uint8Array(length);
-				crypto.randomFillSync(values);
-				
-				for (let i = 0; i < length; i++) {
-					generatedText += charset[values[i] % charset.length];
-				}
-			}
-
-			return generatedText;
-		}
+        }
     },
 
 	add: function (param) {return module.exports._util.controller.add(param)},
