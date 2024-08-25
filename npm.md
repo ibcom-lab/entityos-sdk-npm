@@ -1,6 +1,6 @@
 https://www.npmjs.com/package/entityos
 
-npm adduser (ibcom)
+v(ibcom)
 npm version patch (optional - edit package.json better)
 npm publish
 
