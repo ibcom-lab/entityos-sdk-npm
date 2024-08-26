@@ -1608,6 +1608,29 @@ module.exports =
 			}
 
 			return generatedText;
+		},
+
+		toBase58: function textToBase58(text)
+		{
+			const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+			const buffer = Buffer.from(text, 'utf8');
+			
+			let integer = BigInt(`0x${buffer.toString('hex')}`);
+  
+			let base58 = '';
+			
+			while (integer > 0n) {
+				const remainder = integer % 58n;
+				base58 = BASE58_ALPHABET[Number(remainder)] + base58;
+				integer = integer / 58n;
+			}
+
+			for (let i = 0; i < buffer.length && buffer[i] === 0; i++) {
+				base58 = '1' + base58;
+			}
+			
+			return base58;
 		}
     },
 
