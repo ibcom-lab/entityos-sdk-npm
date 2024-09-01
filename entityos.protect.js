@@ -4,7 +4,7 @@ var entityos = require('entityos/entityos.js');
 
 module.exports = 
 {
-	VERSION: '1.0.2',
+	VERSION: '1.0.4',
 
 	data: {},
 
@@ -17,15 +17,51 @@ module.exports =
             param.hashMethod = 'sha256';
         }
 
-        if (param.output == undefined)
+		let output = _.get(param, 'output');
+        if (output == undefined)
         {
-            param.output = 'base64';
+           output = 'base64';
         }
+
+		let base58 = false;
+		if (output == 'base58')
+		{
+			output = 'hex';
+			base58 = true;
+		}
 
         param.textHashed = createHash(param.hashMethod).update(param.text).digest(param.output);
 
+		if (base58)
+		{
+			param.textHashed = module.exports.convert(
+			{
+				input: 'hex',
+				output: 'base58',
+				text: param.textHashed
+			}).textConverted;
+		}
+
         return param;     
     },
+
+	convert: function (param)
+    {
+		input = _.get(param, 'input', 'hex').toLowerCase();
+		output = _.get(param, 'output', 'base58').toLowerCase();
+		text = _.get(param, 'text');
+
+		if (output == 'base58' && text != undefined)
+		{
+			const bs58 = require('bs58');
+			const buffer = Buffer.from(text, 'hex');
+ 			textConverted = bs58.encode(buffer);
+		}
+
+		param.textConverted = textConverted;
+
+		return param;
+	},
 
     hashWithKey: function (param)
     {
@@ -145,8 +181,6 @@ module.exports =
     decrypt: function (param)
     {
         const { createDecipheriv, randomBytes } = require('crypto');
-
-        var param = entityos.get({ scope: '_param'});
 
 		if (param.key == undefined)
         {
