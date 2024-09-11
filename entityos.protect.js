@@ -4,7 +4,7 @@ var entityos = require('entityos/entityos.js');
 
 module.exports = 
 {
-	VERSION: '1.0.4',
+	VERSION: '1.0.5',
 
 	data: {},
 
@@ -56,6 +56,12 @@ module.exports =
 			const bs58 = require('bs58');
 			const buffer = Buffer.from(text, 'hex');
  			textConverted = bs58.encode(buffer);
+		}
+
+		if (output == 'base64' && text != undefined)
+		{
+			const buffer = Buffer.from(text, input);
+			textConverted = buffer.toString('base64');
 		}
 
 		param.textConverted = textConverted;
