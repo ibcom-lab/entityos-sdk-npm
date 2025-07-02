@@ -3,7 +3,7 @@ var moment = require('moment');
 
 module.exports = 
 {
-	VERSION: '2.2.11',
+	VERSION: '2.2.12',
 
 	data: {session: undefined},
 	controller: {},
@@ -1443,66 +1443,66 @@ module.exports =
 			});
 		},
 
-        attachment:
-        {
-            upload: function (param, fileData)
-            {
-                var filename = module.exports._util.param.get(param, 'filename', {default: 'learn.txt'}).value;
-                var object = module.exports._util.param.get(param, 'object').value;
-                var objectContext = module.exports._util.param.get(param, 'objectContext').value;
-                var base64 = module.exports._util.param.get(param, 'base64', {default: false}).value;
-                var type = module.exports._util.param.get(param, 'type').value;
-                var settings = module.exports.get({scope: '_settings'});
-                var session = module.exports.data.session;
+		attachment:
+		{
+			upload: function (param, fileData)
+			{
+				var filename = module.exports._util.param.get(param, 'filename', {default: 'noname.txt'}).value;
+				var object = module.exports._util.param.get(param, 'object').value;
+				var objectContext = module.exports._util.param.get(param, 'objectContext').value;
+				var base64 = module.exports._util.param.get(param, 'base64', {default: false}).value;
+				var type = module.exports._util.param.get(param, 'type').value;
+				var settings = module.exports.get({scope: '_settings'});
+				var session = module.exports.data.session;
 
-                if (base64)
-                {
-                    module.exports.cloud.invoke(
-                    {
-                        method: 'core_attachment_from_base64',
-                        data:
-                        {
-                            base64: fileData.base64,
-                            filename: filename,
-                            object: object,
-                            objectcontext: objectContext,
-                        },
-                        callback: module.exports._util.attachment.process,
-                        callbackParam: param
-                    });
-                }
-                else
-                {
-                    if (fileData.buffer != undefined)
-                    {
-                        var blob = Buffer.from(fileData.buffer)
-                    }
-                    else
-                    {
-                        var blob = fileData;
-                    }
-                    
-                    var FormData = require('form-data');
-                    var form = new FormData();
-        
+				if (base64)
+				{
+					module.exports.cloud.invoke(
+					{
+						method: 'core_attachment_from_base64',
+						data:
+						{
+							base64: fileData.base64,
+							filename: filename,
+							object: object,
+							objectcontext: objectContext
+						},
+						callback: module.exports._util.attachment.uploadProcess,
+						callbackParam: param
+					});
+				}
+				else
+				{
+					if (fileData.buffer != undefined)
+					{
+						var blob = Buffer.from(fileData.buffer)
+					}
+					else
+					{
+						var blob = fileData;
+					}
+					
+					var FormData = require('form-data');
+					var form = new FormData();
+		
 					console.log(filename)
 
-                    form.append('file0', blob,
-                    {
-                        contentType: 'application/octet-stream',
-                        filename: filename
-                    });
+					form.append('file0', blob,
+					{
+						contentType: 'application/octet-stream',
+						filename: filename
+					});
 
 					console.log('blob')
-                    form.append('filename0', filename);
-                    form.append('object', object);
-                    form.append('objectcontext', objectContext);
-                    form.append('method', 'ATTACH_FILE');
-  
-                    if (!_.isUndefined(type))
-                    {
-                        form.append('type0', type);
-                    }
+					form.append('filename0', filename);
+					form.append('object', object);
+					form.append('objectcontext', objectContext);
+					form.append('method', 'ATTACH_FILE');
+
+					if (!_.isUndefined(type))
+					{
+						form.append('type0', type);
+					}
 
 					var submitOptions =
 					{
@@ -1510,60 +1510,107 @@ module.exports =
 						host: settings.entityos.hostname,
 						path: '/rpc/attach/',
 						headers: {'auth-sid': session.sid, 'auth-logonkey': session.logonkey}
-					  }
+						}
 
-                    form.submit(submitOptions, function(err, res)
-                    {
-                        res.resume();
+					form.submit(submitOptions, function(err, res)
+					{
+						res.resume();
 
-                        res.setEncoding('utf8');
-                        res.on('data', function (chunk)
-                        {
-                            var data = JSON.parse(chunk);
-                            module.exports.attachment.process(param, data)
-                        });
-                    });
-                }
-            },
+						res.setEncoding('utf8');
+						res.on('data', function (chunk)
+						{
+							var data = JSON.parse(chunk);
+							module.exports.attachment.uploadProcess(param, data)
+						});
+					});
+				}
+			},
+			uploadProcess: function (param, response)
+			{
+				if (response.status == 'OK')
+				{
+					var attachment;
 
-            process: function (param, response)
-            {
-                if (response.status == 'OK')
-                {
-                    var attachment;
+					if (_.has(response, 'data.rows'))
+					{
+						attachment = _.first(response.data.rows);
+					}
+					else
+					{
+						attachment = response;
+					}
 
-                    if (_.has(response, 'data.rows'))
-                    {
-                        attachment = _.first(response.data.rows);
-                    }
-                    else
-                    {
-                        attachment = response;
-                    }
+					var data =
+					{
+						attachment:
+						{
+							id: attachment.attachment,
+							link: attachment.attachmentlink,
+							href: '/download/' + attachment.attachmentlink
+						}
+					}
+				}
 
-                    var data =
-                    {
-                        attachment:
-                        {
-                            id: attachment.attachment,
-                            link: attachment.attachmentlink,
-                            href: '/download/' + attachment.attachmentlink
-                        }
-                    }
-                }
+				param = module.exports._util.param.set(param, 'data', data);
 
-                param = module.exports._util.param.set(param, 'data', data);
+				module.exports._util.onComplete(param)
+			},
 
-                module.exports._util.onComplete(param)
-            }
-        },
+			download: function (param, fileData)
+			{
+				var id = module.exports._util.param.get(param, 'id').value;
+					//Attachment Link ID
+
+				var object = module.exports._util.param.get(param, 'object').value;
+				
+				module.exports.cloud.invoke(
+				{
+					method: 'core_attachment_download_as_base64',
+					data:
+					{
+						id: id,
+						object: object
+					},
+					callback: module.exports._util.attachment.downloadProcess,
+					callbackParam: param
+				});
+			},
+			downloadProcess: function (param, response)
+			{
+				if (response.status == 'OK')
+				{
+					var attachment;
+
+					if (_.has(response, 'data.rows'))
+					{
+						attachment = _.first(response.data.rows);
+					}
+					else
+					{
+						attachment = response;
+					}
+
+					var data =
+					{
+						attachment:
+						{
+							base64: response.Base64
+						}
+					}
+				}
+
+				param = module.exports._util.param.set(param, 'data', data);
+
+				module.exports._util.onComplete(param)
+			}
+		},
 
 		generateRandomText: function (param)
 		{
-			var length = module.exports._util.param.get(param, 'length').value;
-			var specialChars = module.exports._util.param.get(param, 'specialChars', {"default": false}).value;
-			var charset = module.exports._util.param.get(param, 'charset').value;
-			var referenceNumber = module.exports._util.param.get(param, 'referenceNumber', {"default": false}).value;
+			var length = entityos._util.param.get(param, 'length').value;
+			var specialChars = entityos._util.param.get(param, 'specialChars', {"default": false}).value;
+			var charset = entityos._util.param.get(param, 'charset').value;
+			var referenceNumber = entityos._util.param.get(param, 'referenceNumber', {"default": false}).value;
 
 			var generatedText = '';
 
@@ -1599,38 +1646,20 @@ module.exports =
 
 				const crypto = require('crypto');
 
+				// Create a buffer to hold the random values
 				const values = new Uint8Array(length);
-				crypto.randomFillSync(values);
-				
+				crypto.randomFillSync(values); // Fill the buffer with cryptographically secure random values
+
+				// Generate the text
+				let generatedText = '';
 				for (let i = 0; i < length; i++) {
 					generatedText += charset[values[i] % charset.length];
 				}
+
+				console.log(generatedText);
 			}
 
 			return generatedText;
-		},
-
-		toBase58: function textToBase58(text)
-		{
-			const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-
-			const buffer = Buffer.from(text, 'utf8');
-			
-			let integer = BigInt(`0x${buffer.toString('hex')}`);
-  
-			let base58 = '';
-			
-			while (integer > 0n) {
-				const remainder = integer % 58n;
-				base58 = BASE58_ALPHABET[Number(remainder)] + base58;
-				integer = integer / 58n;
-			}
-
-			for (let i = 0; i < buffer.length && buffer[i] === 0; i++) {
-				base58 = '1' + base58;
-			}
-			
-			return base58;
 		}
     },
 
